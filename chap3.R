@@ -132,3 +132,77 @@ library(wordcloud)
 head(freq.df)
 
 wordcloud(freq.df$word,freq.df$frequency, max.words = 100, colors = c('black','darkred'))
+
+## Comparing and contrasting corpora in word clouds
+# there will be changes in the stop words
+# we will change the clean.corpus funtion and create a clean.vec function
+# we want to apply the preprocessing function to a text vector and not a corpus object. 
+library(tm)
+library(wordcloud)
+
+tryTolower<- function(x){
+  y = NA
+  try_error = tryCatch(tolower(x), error = function(e) e)
+  if(!inherits(try_error,'error'))
+  y = tolower(x)
+  return(y)
+} # tryTolower is the same
+
+custom.stopwords<- c(stopwords('english'), 'sorry','amp','delta','amazon')
+# some changes in the custom stop words.
+
+# Clean. vec function. 
+clean.vec<- function(text.vec){
+text.vec<- tryTolower(text.vec)
+text.vec<- removeWords(text.vec,custom.stopwords)
+text.vec<- removePunctuation(text.vec)
+text.vec<- stripWhitespace(text.vec)
+text.vec<- removeNumbers(text.vec)
+return(text.vec)
+}
+# Reading the two files
+amzn<- read.csv('amzn_cs.csv')
+delta<- read.csv('oct_delta.csv')
+
+# Cleaning the data 
+amzn.vec<- clean.vec(amzn$text)
+delta.vec<- clean.vec(delta$text)
+# Creating one corpus
+amzn.vec<- paste(amzn.vec, collapse=" ")
+delta.vec<- paste(delta.vec, collapse=" ")
+all<- c(amzn.vec, delta.vec)
+corpus<- VCorpus(VectorSource(all))
+
+# Creating TDM
+tdm<-TermDocumentMatrix(corpus)
+tdm.m<-as.matrix(tdm)
+colnames(tdm.m) = c("Amazon", "delta")
+
+tdm.m[3480:3490,]
+
+pal<- brewer.pal(8,"Purples")
+pal<- pal[-(1:4)] # defining colors for word cloud
+
+commonality.cloud(tdm.m, max.words = 200,random.order=FALSE,
+                  colors = pal)
+
+
+comparison.cloud(tdm.m, max.words = 200, random.order = FALSE,
+ title.size = 1.0,colors = brewer.pal(ncol(tdm.m),"Dark2"))
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
