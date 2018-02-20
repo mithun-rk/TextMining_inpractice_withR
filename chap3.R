@@ -95,3 +95,40 @@ title(main='@DeltaAssist Refund Word Network')
 word_associate(tweets$text, match.string = c('refund'),
                stopwords = Top200Words, network.plot = T, cloud.colors = c('gray85','darkred'))
 title(main='@DeltaAssist Refund Word Network')
+
+## Dendrogram 
+# we need to reduce sparcity
+tdm2<- removeSparseTerms(tdm, sparse=0.975)# by keeping sparse at
+# 0.975 it remove 97% of terms with 0 %
+tdm
+tdm2
+
+hc<-hclust(dist(tdm2, method="euclidean"), method="complete")
+plot(hc,yaxt='n', main='@DeltaAssist Dendrogram')
+
+dend.change<- function(n){if(is.leaf(n)){a<- attributes(n)
+labCol<- labelColors[clusMember[which(names(clusMember)==a$label)]]
+attr(n,"nodePar")<- c(a$nodePar, lab.col = labCol)}
+  n
+}
+
+hcd<- as.dendrogram(hc)
+clusMember<- cutree(hc,4)
+labelColors<- c('darkgrey','darkred','black','#bada55')
+clusDendro<- dendrapply(hcd,dend.change)
+plot(clusDendro,main="@DeltaAssist Dendrogram", type = "triangle", yazt= 'n')
+
+# More sophisticated dendrogram
+library(dendextend)
+library(circlize)
+hcd<- color_labels(hcd,4,col = c('#bada55','darkgrey','black','darkred'))
+hcd<- color_branches(hcd,4,col = c('#bada55','darkgrey','black','darkred'))
+circlize_dendrogram(hcd, 
+labels_track_height = 0.5, dend_track_height = 0.4) 
+circlize_dendrogram(hcd, labels_track_height = 0.5,dend_track_height = 0.4)
+
+## WORD CLOUD
+library(wordcloud)
+head(freq.df)
+
+wordcloud(freq.df$word,freq.df$frequency, max.words = 100, colors = c('black','darkred'))
