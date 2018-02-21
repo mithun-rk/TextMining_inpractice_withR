@@ -190,17 +190,23 @@ commonality.cloud(tdm.m, max.words = 200,random.order=FALSE,
 comparison.cloud(tdm.m, max.words = 200, random.order = FALSE,
  title.size = 1.0,colors = brewer.pal(ncol(tdm.m),"Dark2"))
 
+library(plotrix)
+common.words <- subset(tdm.m, tdm.m[, 1] > 0 
+                       & tdm.m[, 2] > 0)
+tail(common.words)
+
+difference<- abs(common.words[,1] - common.words[,2])
+common.words<- cbind(common.words, difference)
+common.words<- common.words[order(common.words[, 3], decreasing = TRUE), ]
 
 
+top25.df<- data.frame(x = common.words[1:25,1],
+                      y = common.words[1:25,2],
+                      labels = rownames(common.words[1:25,]))  
 
-
-
-
-
-
-  
-
-
+pyramid.plot(top25.df$x, top25.df$y, labels = top25.df$labels,
+             gap = 14, top.labels = c("Amazon", "Words", "delta"),
+             main = "Words in Common", laxlab = NULL, raxlab = NULL, unit = NULL)
 
 
 
